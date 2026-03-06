@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Gå med holdet – Kvickly Åbyhøj</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    :root {
+      --red: #DA291C; --red-dark: #B01F14;
+      --bg: #0f0f0f; --mid: #1a1a1a; --light: #242424;
+      --border: rgba(255,255,255,.08); --muted: rgba(255,255,255,.45);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { min-height:100vh; background:var(--bg); color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+      display:flex; flex-direction:column; align-items:center; padding:1rem; }
+
+    /* site nav */
+    #sitenav { width:100%; max-width:420px; display:flex; gap:.5rem; margin-bottom:1.2rem; }
+    .snlink { display:inline-flex; align-items:center; gap:.3rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      color:rgba(255,255,255,.7); font-size:.62rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+      padding:.26rem .65rem; border-radius:999px; text-decoration:none; transition:all .2s; }
+    .snlink:hover { background:rgba(218,41,28,.15); border-color:rgba(218,41,28,.4); color:#fff; }
+    .snlink.active-link { background:rgba(218,41,28,.18); border-color:rgba(218,41,28,.5); color:var(--red); }
+
+    .phone { width:100%; max-width:420px; background:var(--mid); border:1px solid var(--border); border-radius:2.2rem;
+      overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,.5); }
+
+    /* step system */
+    .step-screen { display:none; flex-direction:column; }
+    .step-screen.active { display:flex; }
+
+    /* header */
+    .ph { padding:1.3rem 1.4rem 1rem; background:linear-gradient(180deg,rgba(218,41,28,.12) 0%,transparent 100%); }
+    .ph-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .notch { width:100px; height:20px; background:var(--bg); border-radius:999px; }
+    .store-badge { display:flex; align-items:center; gap:.45rem; background:rgba(218,41,28,.12); border:1px solid rgba(218,41,28,.25); border-radius:999px; padding:.28rem .75rem; }
+    .store-badge span { font-size:.65rem; font-weight:700; color:var(--red); letter-spacing:.04em; }
+
+    .body { padding:0 1.4rem 1.4rem; display:flex; flex-direction:column; gap:1rem; }
+
+    .btn { width:100%; padding:.9rem 1.4rem; border-radius:1rem; font-size:.95rem; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:.55rem; border:none; transition:all .2s; }
+    .btn-primary { background:var(--red); color:#fff; }
+    .btn-primary:hover { background:var(--red-dark); transform:scale(1.02); box-shadow:0 10px 30px rgba(218,41,28,.35); }
+    .btn-secondary { background:rgba(255,255,255,.06); color:rgba(255,255,255,.85); border:1px solid var(--border); }
+    .btn-secondary:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
+    .btn-ghost { background:transparent; color:var(--muted); font-size:.82rem; padding:.5rem; }
+    .btn-ghost:hover { color:#fff; }
+
+    .section-label { font-size:.58rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-bottom:.55rem; }
+
+    .choice-row { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
+    .choice { background:rgba(255,255,255,.04); border:2px solid rgba(255,255,255,.08); border-radius:1.1rem;
+      padding:1.1rem .9rem; text-align:center; cursor:pointer; transition:all .22s; }
+    .choice:hover { border-color:rgba(218,41,28,.4); background:rgba(218,41,28,.06); }
+    .choice.selected { border-color:var(--red); background:rgba(218,41,28,.1); }
+    .choice-icon { font-size:1.8rem; margin-bottom:.45rem; }
+    .choice-title { font-size:.88rem; font-weight:700; }
+    .choice-sub { font-size:.65rem; color:var(--muted); margin-top:.2rem; line-height:1.4; }
+
+    .field { display:flex; flex-direction:column; gap:.4rem; }
+    .field label { font-size:.7rem; font-weight:600; letter-spacing:.04em; color:rgba(255,255,255,.7); }
+    .field input, .field select { width:100%; padding:.75rem 1rem; background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.1);
+      border-radius:.8rem; color:#fff; font-size:.92rem; font-family:inherit; outline:none; transition:border-color .2s; }
+    .field input:focus, .field select:focus { border-color:var(--red); background:rgba(218,41,28,.04); }
+    .field input::placeholder { color:var(--muted); }
+    .field select option { background:#1a1a1a; }
+    .field .hint { font-size:.65rem; color:var(--muted); line-height:1.5; }
+    .field .hint a { color:rgba(218,41,28,.85); text-decoration:none; }
+    .field .hint a:hover { color:var(--red); }
+
+    .opt-tag { display:inline-flex; align-items:center; gap:.3rem; font-size:.6rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.08em; background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.25); color:#fbbf24; border-radius:999px; padding:.18rem .55rem; margin-left:.4rem; vertical-align:middle; }
+
+    .info-banner { background:rgba(74,222,128,.05); border:1px solid rgba(74,222,128,.18); border-radius:.9rem; padding:.8rem 1rem; }
+
+    .prog-bar { display:flex; align-items:center; gap:.2rem; margin-bottom:.2rem; }
+    .prog-seg { height:3px; border-radius:2px; flex:1; background:rgba(255,255,255,.1); transition:background .3s; }
+    .prog-seg.done { background:var(--red); }
+    .prog-seg.active { background:rgba(218,41,28,.45); }
+
+    /* confirmation screen */
+    .confetti { font-size:3rem; text-align:center; animation:bounce .6s ease; }
+    @keyframes bounce { 0%{transform:scale(.5)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+    .team-card { background:linear-gradient(135deg,rgba(218,41,28,.15),rgba(218,41,28,.05)); border:2px solid rgba(218,41,28,.35); border-radius:1.4rem; padding:1.4rem; text-align:center; }
+    .lb-row { display:flex; align-items:center; gap:.7rem; padding:.65rem .8rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); border-radius:.8rem; }
+    .lb-rank { font-size:.75rem; font-weight:900; color:var(--muted); min-width:1.4rem; text-align:center; }
+    .lb-rank.top { color:var(--red); }
+    .lb-name { flex:1; font-size:.85rem; font-weight:600; }
+    .lb-steps { font-size:.75rem; color:var(--muted); }
+    .lbbar-outer { flex:1; height:5px; background:rgba(255,255,255,.07); border-radius:3px; overflow:hidden; max-width:60px; }
+    .lbbar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--red),#ff7b71); }
+
+    .step-prog { display:flex; align-items:center; justify-content:space-between; font-size:.65rem; color:var(--muted); margin-bottom:.25rem; }
+  </style>
+</head>
+<body>
+
+<div id="sitenav">
+  <a href="pitch.html" class="snlink">📊 Pitch</a>
+  <a href="tilmelding.html" class="snlink active-link">📱 Tilmelding</a>
+  <a href="kampagne.html" class="snlink">🏆 Kampagne</a>
+</div>
+
+<div class="phone">
+
+  <!-- ══ STEP 1: HOOK ══ -->
+  <div class="step-screen active" id="step1">
+    <div class="ph">
+      <div class="ph-top">
+        <div class="notch"></div>
+        <div class="store-badge"><span data-lucide="map-pin" style="width:10px;height:10px;"></span><span>Kvickly Åbyhøj</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem;">
+        <div style="font-size:1.6rem;">🏠</div>
+        <div>
+          <div style="font-size:1.05rem;font-weight:800;line-height:1.2;">Kvickly Åbyhøj<br>Bliv en del af holdet</div>
+        </div>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">14-dages husstand-konkurrence · <strong style="color:#fff;">Dag 1 af 14 starter 1. feb</strong></div>
+    </div>
+    <div class="body">
+      <div style="background:rgba(218,41,28,.06);border:1px solid rgba(218,41,28,.2);border-radius:1rem;padding:1rem;">
+        <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--red);font-weight:700;margin-bottom:.7rem;">Hvad er det?</div>
+        <div style="display:flex;flex-direction:column;gap:.55rem;">
+          <div style="display:flex;align-items:flex-start;gap:.6rem;font-size:.8rem;">
+            <span style="font-size:1rem;flex-shrink:0;">👣</span>
+            <span style="color:rgba(255,255,255,.85);line-height:1.5;">Gå skridt som hold – <strong style="color:#fff;">vi samler alle husstandens skridt</strong></span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.6rem;font-size:.8rem;">
+            <span style="font-size:1rem;flex-shrink:0;">🏪</span>
+            <span style="color:rgba(255,255,255,.85);line-height:1.5;">Dyst mod dine naboer på <strong style="color:#fff;">Team Kvickly Åbyhøj</strong></span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.6rem;font-size:.8rem;">
+            <span style="font-size:1rem;flex-shrink:0;">🎁</span>
+            <span style="color:rgba(255,255,255,.85);line-height:1.5;"><strong style="color:#fff;">Eksklusiv lodtrækning</strong> for alle med min. 2 køb i perioden</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);text-align:center;line-height:1.55;">
+        Alle er velkomne på holdet. Lodtrækningen kræver blot dit Coop-nummer.
+      </div>
+      <button class="btn btn-primary" onclick="goto(2)" style="font-size:1rem;padding:1rem 1.4rem;box-shadow:0 8px 28px rgba(218,41,28,.45);letter-spacing:.01em;">
+        <span data-lucide="users" style="width:18px;height:18px;"></span>
+        Gå med holdet – gratis
+      </button>
+      <button class="btn btn-ghost" onclick="goto(2)" style="color:rgba(255,255,255,.65);font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:.35rem;">Hvad vinder man? <span style="font-size:1rem;">&#x1F381;</span> <span style="color:rgba(218,41,28,.8);">&#x2192;</span></button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: HUSSTAND ELLER ENKELT ══ -->
+  <div class="step-screen" id="step2">
+    <div class="ph">
+      <div class="ph-top"><div class="notch"></div><div class="store-badge"><span data-lucide="map-pin" style="width:10px;height:10px;"></span><span>Kvickly Åbyhøj</span></div></div>
+      <div class="step-prog"><span>Trin 1 af 3</span><span>Vælg type</span></div>
+      <div class="prog-bar">
+        <div class="prog-seg done"></div>
+        <div class="prog-seg active"></div>
+        <div class="prog-seg"></div>
+      </div>
+    </div>
+    <div class="body" style="padding-top:.8rem;">
+      <div>
+        <div class="section-label">Hvem er på holdet?</div>
+        <div class="choice-row">
+          <div class="choice selected" id="c-husstand" onclick="selectType('husstand')">
+            <div class="choice-icon">👨‍👩‍👧</div>
+            <div class="choice-title">Husstand</div>
+            <div class="choice-sub">Gå sammen som familie eller par. I samler alle jeres skridt i én fælles pulje.</div>
+          </div>
+          <div class="choice" id="c-enkelt" onclick="selectType('enkelt')">
+            <div class="choice-icon">🧍</div>
+            <div class="choice-title">Enkeltperson</div>
+            <div class="choice-sub">Kun dig selv</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-banner" id="type-info">
+        <div style="font-size:.72rem;color:rgba(255,255,255,.85);line-height:1.6;">
+          <span style="color:#4ade80;font-weight:700;">Husstand anbefales – mest populært</span><br>
+          Alle i husstanden bidrager til holdets samlede mål. Flere aktive gå-dage giver flere lodder i puljen.
+        </div>
+      </div>
+      <button class="btn btn-primary" id="step2-btn" onclick="goto(3)">
+        Vælg Husstand &amp; Fortsæt <span data-lucide="arrow-right" style="width:16px;height:16px;"></span>
+      </button>
+      <button class="btn btn-ghost" onclick="goto(1)">← Tilbage</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: NAVN + BUTIK ══ -->
+  <div class="step-screen" id="step3">
+    <div class="ph">
+      <div class="ph-top"><div class="notch"></div><div class="store-badge"><span data-lucide="map-pin" style="width:10px;height:10px;"></span><span>Kvickly Åbyhøj</span></div></div>
+      <div class="step-prog"><span>Trin 2 af 3</span><span>Dine oplysninger</span></div>
+      <div class="prog-bar">
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <div class="prog-seg active"></div>
+      </div>
+    </div>
+    <div class="body" style="padding-top:.8rem;">
+      <div class="field">
+        <label>Hvad skal jeres hold hedde?</label>
+        <input type="text" id="holdnavn" placeholder="F.eks. Familie Hansen" />
+        <div class="hint">Vælg et navn, naboerne kan se på leaderboardet – f.eks. 'Super-Sørensen' eller 'Team Åbyhøj-vej'.</div>
+      </div>
+      <div class="field">
+        <label>Vælg din butik</label>
+        <select id="butik">
+          <option value="aabyhoj">Kvickly Åbyhøj</option>
+          <option value="bazar">Kvickly Viborg</option>
+          <option value="horsens">Kvickly Horsens</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Coop-medlemsnummer <span class="opt-tag">Valgfri</span></label>
+        <input type="text" id="coopnr" placeholder="12345678" inputmode="numeric" pattern="[0-9]*" />
+        <div class="hint">
+          Kun nødvendigt for at <strong style="color:#fff;">låse op for præmier og lodtrækning</strong>.<br>
+          Mangler du et nummer? <a href="#">Bliv medejer på 2 minutter her →</a>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="goto(4)">
+        Tilmeld holdet og start kampen <span data-lucide="arrow-right" style="width:16px;height:16px;"></span>
+      </button>
+      <button class="btn btn-ghost" onclick="goto(2)">← Tilbage</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: BEKRÆFTELSE ══ -->
+  <div class="step-screen" id="step4">
+    <div class="ph" style="padding-bottom:.8rem;">
+      <div class="ph-top"><div class="notch"></div><div class="store-badge" style="background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);"><span style="font-size:.65rem;font-weight:700;color:#4ade80;">TILMELDT</span></div></div>
+    </div>
+    <div class="body" style="padding-top:.2rem;">
+      <div class="confetti">🎉</div>
+      <div class="team-card">
+        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:.55rem;font-weight:700;">Velkommen i Klubhuset!</div>
+        <div style="font-size:1.3rem;font-weight:900;margin-bottom:.2rem;" id="conf-navn">Familie Hansen</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem;" id="conf-butik">Team Kvickly Åbyhøj · Husstand</div>
+        <div style="background:rgba(218,41,28,.08);border:1px solid rgba(218,41,28,.2);border-radius:.75rem;padding:.7rem;margin-bottom:.7rem;" id="conf-lod">
+          <div style="font-size:.68rem;font-weight:700;color:var(--red);margin-bottom:.2rem;">🎁 Lodtrækning aktiv</div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.75);line-height:1.5;">Du mangler <strong style="color:#fff;">2 køb</strong> i perioden for at komme i lodtrækning. Verificeres automatisk hver nat.</div>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);line-height:1.5;" id="conf-nolod" style="display:none;"></div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:.5rem;">Se hvem I dyster mod i Åbyhøj</div>
+        <div style="display:flex;flex-direction:column;gap:.45rem;">
+          <div class="lb-row">
+            <div class="lb-rank top">1</div>
+            <div style="font-size:.9rem;font-weight:800;flex-shrink:0;min-width:1.6rem;">🥇</div>
+            <div class="lb-name">Familien Nielsen</div>
+            <div class="lbbar-outer"><div class="lbbar-fill" style="width:92%;"></div></div>
+            <div class="lb-steps">14.200</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank top">2</div>
+            <div style="font-size:.9rem;font-weight:800;flex-shrink:0;min-width:1.6rem;">🥈</div>
+            <div class="lb-name">Jesper & Lotte</div>
+            <div class="lbbar-outer"><div class="lbbar-fill" style="width:78%;"></div></div>
+            <div class="lb-steps">12.850</div>
+          </div>
+          <div class="lb-row" style="border-color:rgba(218,41,28,.4);background:rgba(218,41,28,.1);">
+            <div class="lb-rank" style="color:var(--red);font-weight:900;">NY</div>
+            <div style="font-size:.9rem;flex-shrink:0;min-width:1.6rem;">⭐</div>
+            <div style="flex:1;min-width:0;">
+              <div class="lb-name" id="conf-lb-navn" style="color:var(--red);">Familie Hansen</div>
+              <div style="font-size:.58rem;color:rgba(218,41,28,.8);font-weight:600;margin-top:.1rem;">Gør jer klar til at overhale!</div>
+            </div>
+            <div class="lbbar-outer"><div class="lbbar-fill" style="width:5%;"></div></div>
+            <div class="lb-steps">0</div>
+          </div>
+        </div>
+      </div>
+      <a href="kampagne.html" class="btn btn-primary" style="text-decoration:none;justify-content:center;">
+        <span data-lucide="bar-chart-2" style="width:17px;height:17px;"></span>
+        Gå til Klubhuset og se jeres placering
+      </a>
+      <button class="btn btn-ghost" onclick="goto(1)">← Start forfra (demo)</button>
+    </div>
+  </div>
+
+</div><!-- .phone -->
+
+<script>
+  function goto(n) {
+    document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('step'+n);
+    if (el) el.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if (n === 4) buildConfirmation();
+    lucide.createIcons();
+  }
+
+  function selectType(type) {
+    document.getElementById('c-husstand').classList.toggle('selected', type==='husstand');
+    document.getElementById('c-enkelt').classList.toggle('selected', type==='enkelt');
+    const info = document.getElementById('type-info');
+    const btn = document.getElementById('step2-btn');
+    if (type === 'enkelt') {
+      info.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.85);line-height:1.6;">Du deltager som enkeltperson. Skridt tæller kun for dig. Du kan stadig deltage i lodtrækning med dit Coop-nummer.</div>';
+      btn.innerHTML = 'Vælg Enkeltperson &amp; Fortsæt <span data-lucide="arrow-right" style="width:16px;height:16px;"></span>';
+    } else {
+      info.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.85);line-height:1.6;"><span style="color:#4ade80;font-weight:700;">Husstand anbefales – mest populært</span><br>Alle i husstanden bidrager til holdets samlede mål. Flere aktive gå-dage giver flere lodder i puljen.</div>';
+      btn.innerHTML = 'Vælg Husstand &amp; Fortsæt <span data-lucide="arrow-right" style="width:16px;height:16px;"></span>';
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function buildConfirmation() {
+    const navn = document.getElementById('holdnavn').value || 'Jeres Husstand';
+    const coopnr = document.getElementById('coopnr').value.trim();
+    document.getElementById('conf-navn').textContent = navn;
+    document.getElementById('conf-lb-navn').textContent = navn;
+    const husstandActive = document.getElementById('c-husstand').classList.contains('selected');
+    document.getElementById('conf-butik').textContent = 'Team Kvickly Åbyhøj · ' + (husstandActive ? 'Husstand' : 'Enkeltperson');
+    if (!coopnr) {
+      document.getElementById('conf-lod').style.display = 'none';
+      document.getElementById('conf-nolod').style.display = 'block';
+      document.getElementById('conf-nolod').innerHTML = '<span style="color:#fbbf24;font-weight:700;">Du er i gang med at tælle skridt, men du mangler at aktivere din vinderchance.</span><br><a href="#" style="color:rgba(218,41,28,.9);text-decoration:none;font-weight:600;">Lås op for lodtrækning og præmier her →</a>';
+    } else {
+      document.getElementById('conf-lod').style.display = 'block';
+      document.getElementById('conf-nolod').style.display = 'none';
+    }
+  }
+
+  lucide.createIcons();
+</script>
+</body>
+</html>

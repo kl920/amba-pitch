@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klubhus-Konceptet – Coop amba Pitch 2026</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    :root {
+      --red: #DA291C; --red-dark: #B01F14;
+      --anthracite: #0f0f0f; --mid: #1a1a1a; --light: #242424;
+      --card: rgba(255,255,255,.04); --border: rgba(255,255,255,.08);
+      --muted: rgba(255,255,255,.45);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { width:100%; height:100%; overflow:hidden; background:var(--anthracite); color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif; }
+    #prog { position:fixed; top:0; left:0; height:2px; background:var(--red); transition:width .5s ease; box-shadow:0 0 10px rgba(218,41,28,.7); z-index:300; }
+    #wrap { width:100%; height:100vh; position:relative; overflow:hidden; }
+
+    .slide { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:2.5rem 3rem;
+      opacity:0; pointer-events:none; transition:opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1); transform:translateX(48px); }
+    .slide.active { opacity:1; transform:translateX(0); pointer-events:all; }
+    .inner { width:100%; max-width:1080px; max-height:88vh; overflow-y:auto; overflow-x:hidden; padding:0 .25rem;
+      scrollbar-width:thin; scrollbar-color:rgba(218,41,28,.3) transparent; }
+    .inner::-webkit-scrollbar { width:3px; }
+    .inner::-webkit-scrollbar-thumb { background:rgba(218,41,28,.3); border-radius:2px; }
+
+    #nav { position:fixed; bottom:1.75rem; left:50%; transform:translateX(-50%);
+      display:flex; align-items:center; gap:.85rem;
+      background:rgba(15,15,15,.92); backdrop-filter:blur(24px);
+      border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:.45rem 1.1rem; z-index:200; }
+    .nbtn { width:2rem; height:2rem; border-radius:50%; background:transparent; border:1px solid rgba(255,255,255,.1);
+      color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s,border-color .2s; }
+    .nbtn:hover { background:var(--red); border-color:var(--red); }
+    .dots { display:flex; gap:.35rem; align-items:center; }
+    .dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.22); cursor:pointer; transition:background .3s,width .3s; }
+    .dot.on { background:var(--red); width:16px; border-radius:3px; }
+    #ctr { font-size:.68rem; color:var(--muted); min-width:2.4rem; text-align:center; letter-spacing:.05em; }
+
+    /* links nav */
+    #sitenav { position:fixed; top:1.2rem; right:1.5rem; display:flex; gap:.6rem; z-index:200; }
+    .snlink { display:inline-flex; align-items:center; gap:.35rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      color:rgba(255,255,255,.7); font-size:.65rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+      padding:.28rem .7rem; border-radius:999px; text-decoration:none; transition:all .2s; }
+    .snlink:hover { background:rgba(218,41,28,.15); border-color:rgba(218,41,28,.4); color:#fff; }
+    .snlink.active-link { background:rgba(218,41,28,.18); border-color:rgba(218,41,28,.5); color:var(--red); }
+
+    @keyframes up    { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes bar   { from{width:0} }
+    @keyframes flow  { to{left:200%} }
+    @keyframes ping  { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(2.2);opacity:0} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes pdot  { 0%,100%{opacity:1} 50%{opacity:.3} }
+    @keyframes ticker{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    .rv { opacity:0; transform:translateY(18px); }
+    .slide.active .rv { animation:up .52s ease forwards; }
+    .slide.active .rv:nth-child(1){animation-delay:.06s}
+    .slide.active .rv:nth-child(2){animation-delay:.14s}
+    .slide.active .rv:nth-child(3){animation-delay:.22s}
+    .slide.active .rv:nth-child(4){animation-delay:.30s}
+    .slide.active .rv:nth-child(5){animation-delay:.38s}
+    .slide.active .rv:nth-child(6){animation-delay:.46s}
+
+    .tag { display:inline-flex; align-items:center; gap:.4rem; background:rgba(218,41,28,.12); border:1px solid rgba(218,41,28,.3);
+      color:#ff7b71; font-size:.63rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:.25rem .65rem; border-radius:999px; }
+    .title { font-size:clamp(1.9rem,4.8vw,3.6rem); font-weight:800; letter-spacing:-.03em; line-height:1.04; }
+    .red { color:var(--red); }
+    .muted { color:var(--muted); }
+
+    .glass { background:var(--card); border:1px solid var(--border); border-radius:1.1rem;
+      transition:border-color .3s,transform .3s,box-shadow .3s; }
+    .glass:hover { border-color:rgba(218,41,28,.35); transform:translateY(-3px); box-shadow:0 12px 36px rgba(218,41,28,.1); }
+
+    .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .kpi { background:var(--mid); border:1px solid var(--border); border-radius:1rem; padding:1.4rem 1.2rem; text-align:center; transition:border-color .3s,transform .3s; }
+    .kpi:hover { border-color:rgba(218,41,28,.4); transform:translateY(-3px); }
+    .kpi-num { font-size:2.6rem; font-weight:900; letter-spacing:-.04em; color:var(--red); line-height:1; }
+    .kpi-label { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:.35rem; }
+    .kpi-sub { font-size:.7rem; color:rgba(255,255,255,.6); margin-top:.3rem; }
+
+    .row3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .pillar { background:var(--mid); border:1px solid var(--border); border-radius:1rem; padding:1.25rem; display:flex; flex-direction:column; gap:.6rem; transition:border-color .3s,transform .3s; }
+    .pillar:hover { border-color:rgba(218,41,28,.38); transform:translateY(-3px); }
+    .pill-icon { font-size:1.6rem; width:3rem; height:3rem; background:rgba(218,41,28,.1); border-radius:.7rem; display:flex; align-items:center; justify-content:center; }
+
+    .step { display:flex; gap:.75rem; align-items:flex-start; }
+    .stepnum { width:2rem; height:2rem; border-radius:50%; background:rgba(218,41,28,.13); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.75rem; font-weight:800; color:var(--red); }
+
+    .tbl { width:100%; border-collapse:collapse; }
+    .tbl th { font-size:.6rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); padding:.5rem .9rem; text-align:left; border-bottom:1px solid var(--border); }
+    .tbl td { font-size:.8rem; padding:.7rem .9rem; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:top; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .tbl tr:hover td { background:rgba(255,255,255,.02); }
+
+    .meter-row { display:flex; align-items:center; gap:.8rem; margin-bottom:.55rem; }
+    .meter-label { font-size:.75rem; min-width:130px; color:rgba(255,255,255,.75); }
+    .meter-bar { flex:1; height:7px; background:rgba(255,255,255,.08); border-radius:4px; overflow:hidden; }
+    .meter-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--red),#ff7b71); animation:bar 1.2s ease forwards; }
+    .meter-val { font-size:.72rem; font-weight:700; min-width:3rem; text-align:right; color:var(--red); }
+
+    .ctabtn { display:inline-flex; align-items:center; gap:.75rem; background:var(--red); color:#fff; font-size:1rem; font-weight:700;
+      padding:.9rem 2.2rem; border-radius:999px; border:none; cursor:pointer; transition:transform .2s,box-shadow .2s,background .2s; }
+    .ctabtn:hover { background:var(--red-dark); transform:scale(1.04); box-shadow:0 14px 40px rgba(218,41,28,.45); }
+
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#4ade80; animation:pdot 1.2s ease infinite; display:inline-block; }
+
+    .conn { flex:1; height:2px; background:linear-gradient(90deg,rgba(218,41,28,.5),rgba(218,41,28,.1)); position:relative; overflow:hidden; }
+    .conn::after { content:''; position:absolute; top:0; left:-60%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent); animation:flow 2s linear infinite; }
+    .arr { width:0; height:0; border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:7px solid rgba(218,41,28,.7); flex-shrink:0; }
+    .flow-node { display:flex; flex-direction:column; align-items:center; text-align:center; }
+    .flow-ring { width:3.8rem; height:3.8rem; border-radius:50%; border:2px solid rgba(218,41,28,.35); display:flex; align-items:center; justify-content:center; background:rgba(218,41,28,.07); margin-bottom:.5rem; }
+    .flow-ring.hot { border-color:var(--red); box-shadow:0 0 20px rgba(218,41,28,.35); }
+
+    @media(max-width:768px){ .slide{padding:1rem;} .kpi-grid,.row3{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+<div id="prog" style="width:16.6%"></div>
+
+<!-- Site nav -->
+<div id="sitenav">
+  <a href="pitch.html" class="snlink active-link">📊 Pitch</a>
+  <a href="tilmelding.html" class="snlink">📱 Tilmelding</a>
+  <a href="kampagne.html" class="snlink">🏆 Kampagne</a>
+</div>
+
+<div id="wrap">
+
+<!-- ══ SLIDE 1: HOOK ══ -->
+<section class="slide active" id="s1" style="background:radial-gradient(ellipse at 30% 50%,rgba(218,41,28,.08) 0%,transparent 60%);">
+  <div class="inner" style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;">
+    <div>
+      <div class="tag rv" style="margin-bottom:1rem;"><span data-lucide="map-pin" style="width:11px;height:11px;"></span> Coop amba · Pilot 2026</div>
+      <h1 class="title rv" style="margin-bottom:1.1rem;">Gør butikken til<br><span class="red">bydelens Klubhus.</span><br><span style="font-size:.5em;color:rgba(255,255,255,.5);font-weight:300;">14 dages fællesskab. Automatisk. Kommercielt.</span></h1>
+      <p class="rv muted" style="font-size:1rem;line-height:1.75;max-width:420px;margin-bottom:1.5rem;">Vi aktiverer Tæl Skridts motor og bygger et lag af lokalt fællesskab ovenpå, der motiverer husstande til at vælge jeres butik – systematisk og målbart.</p>
+      <div class="rv" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+        <a href="tilmelding.html" class="ctabtn" style="font-size:.88rem;padding:.75rem 1.7rem;text-decoration:none;">Se tilmeldingsflow <span data-lucide="arrow-right" style="width:16px;height:16px;"></span></a>
+        <a href="kampagne.html" style="font-size:.82rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">Se live kampagne <span data-lucide="external-link" style="width:13px;height:13px;"></span></a>
+      </div>
+    </div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:.85rem;">
+      <div style="background:rgba(218,41,28,.06);border:1px solid rgba(218,41,28,.2);border-radius:1.2rem;padding:1.4rem 1.6rem;">
+        <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--red);font-weight:700;margin-bottom:1.1rem;">Aktivitetspotentiale pr. butik</div>
+        <div class="meter-row"><div class="meter-label">Deltagelse</div><div class="meter-bar"><div class="meter-fill" style="width:75%;"></div></div><div class="meter-val" style="font-size:.72rem;text-align:right;line-height:1.3;">150+<br><span style="font-size:.58rem;color:var(--muted);font-weight:400;">aktive husstande</span></div></div>
+        <div class="meter-row"><div class="meter-label">Frekvensløft</div><div class="meter-bar"><div class="meter-fill" style="width:100%;"></div></div><div class="meter-val" style="font-size:.72rem;text-align:right;line-height:1.3;">+100%<br><span style="font-size:.58rem;color:var(--muted);font-weight:400;">besøgsfrekvens pr. deltager</span></div></div>
+        <div class="meter-row"><div class="meter-label">Besøgs-effekt</div><div class="meter-bar"><div class="meter-fill" style="width:40%;"></div></div><div class="meter-val" style="font-size:.72rem;text-align:right;line-height:1.3;">75–100<br><span style="font-size:.58rem;color:var(--muted);font-weight:400;">inkrementelle besøg</span></div></div>
+        <div style="border-top:1px solid rgba(255,255,255,.08);margin-top:.75rem;padding-top:.85rem;">
+          <div style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.25rem;">Målbar adfærdsændring</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.6);line-height:1.6;">Verificerbar via medlemsnummer + kassedata.<br>Vi beviser effekten sort på hvidt i piloten.</div>
+        </div>
+      </div>
+      <div style="background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.18);border-radius:.85rem;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.8rem;">
+        <span style="font-size:1.4rem;">🕐</span>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:#4ade80;">15 minutters opsætning for butikken</div>
+          <div style="font-size:.68rem;color:var(--muted);line-height:1.5;">5 plakater og 1 gulvfolie. Vi håndterer al teknik og data-opsamling.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 2: DE 3 MOTORER ══ -->
+<section class="slide" id="s2">
+  <div class="inner">
+    <div style="text-align:center;margin-bottom:1.8rem;">
+      <div class="tag rv" style="margin-bottom:.8rem;"><span data-lucide="zap" style="width:11px;height:11px;"></span> Hvorfor det virker</div>
+      <h2 class="title rv">De 3 <span class="red">kommercielle motorer</span></h2>
+      <p class="rv muted" style="margin-top:.55rem;font-size:.92rem;">Det føles som lokalt fællesskab. Det fungerer som en kommerciel salgsmotor.</p>
+    </div>
+    <div class="row3 rv">
+      <div class="pillar">
+        <div class="pill-icon">🎯</div>
+        <div style="font-size:1rem;font-weight:800;">Lodtrækning som købsforpligtelse</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6;">For kunden er det en sjov konkurrence. For Coop er det en salgsmotor. <strong style="color:#fff;">Min. 2 køb</strong> for at deltage sikrer nye transaktioner – ikke bare flytning af eksisterende salg. Kvalifikation kræver medlemsnummer – det giver os <strong style="color:#fff;">100% verificerbar data.</strong></div>
+        <div style="background:rgba(218,41,28,.15);border:1px solid rgba(218,41,28,.3);border-radius:.55rem;padding:.6rem .75rem;font-size:.78rem;">
+          <span style="color:var(--red);font-weight:800;font-size:1.1rem;">75–100</span> <span style="color:#fff;font-weight:600;">ekstra besøg pr. kampagne</span>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pill-icon">👨‍👩‍👧</div>
+        <div style="font-size:1rem;font-weight:800;">Familien som holdet</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6;">Fællesskabet starter ved middagsbordet. <strong style="color:#fff;">Børn motiverer voksne.</strong> Når familien dyster sammen, bliver butiksbesøget en fælles mission – ikke et ærinde.</div>
+        <div style="background:rgba(218,41,28,.15);border:1px solid rgba(218,41,28,.3);border-radius:.55rem;padding:.6rem .75rem;font-size:.78rem;line-height:1.55;color:rgba(255,255,255,.85);">
+          Husstandskurven er beviseligt højere end enkeltkøb. Ved at aktivere hele familien som et hold, løfter vi både kurvsstørrelse og frekvens.
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pill-icon">🏠</div>
+        <div style="font-size:1rem;font-weight:800;">Butikken ejer følelsen</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6;">Butikken bliver bydelens Klubhus. Vi skaber den lokale <strong style="color:#fff;">'Hal-effekt'</strong> – en tilhørsfornemmelsesom discountkæderne aldrig kan kopiere.</div>
+        <div style="background:rgba(218,41,28,.15);border:1px solid rgba(218,41,28,.3);border-radius:.55rem;padding:.6rem .75rem;font-size:.78rem;">
+          <span style="color:var(--red);font-weight:800;font-size:1.1rem;">Lokal loyalitet</span> <span style="color:#fff;font-weight:600;">Rema og Salling ikke kan købe</span>
+        </div>
+      </div>
+    </div>
+    <div class="rv" style="margin-top:1.1rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:.85rem;padding:.8rem 1.2rem;text-align:center;">
+      <span style="font-size:.8rem;color:rgba(255,255,255,.75);">Vi genbruger en gennemtestet motor (Tæl Skridt) – det <strong style="color:#fff;">minimerer udviklingsrisikoen</strong> og sikrer lynhurtig eksekvering på eksisterende infrastruktur.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 3: FLOW ══ -->
+<section class="slide" id="s3">
+  <div class="inner">
+    <div style="text-align:center;margin-bottom:1.6rem;">
+      <div class="tag rv" style="margin-bottom:.8rem;"><span data-lucide="git-branch" style="width:11px;height:11px;"></span> Tilmeldingsflow</div>
+      <h2 class="title rv">Alle kan gå med – <span class="red">de loyale vinder</span></h2>
+      <p class="rv muted" style="margin-top:.55rem;font-size:.92rem;">Ingen adgangsbarrierer for volumen. Præmierne er forbeholdt de loyale.</p>
+    </div>
+    <div class="rv" style="display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;align-items:start;">
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <div class="step" style="background:var(--mid);border:1px solid var(--border);border-radius:.9rem;padding:.9rem;">
+          <div class="stepnum">1</div>
+          <div>
+            <div style="font-weight:700;font-size:.88rem;margin-bottom:.2rem;">Hverv via FB · CoopApp · QR i butik</div>
+            <div style="font-size:.73rem;color:var(--muted);line-height:1.5;">"Gå med Team Kvickly Åbyhøj – alle kan være med." Ingen krav om medlemsnummer for at komme i gang.</div>
+          </div>
+        </div>
+        <div class="step" style="background:var(--mid);border:1px solid var(--border);border-radius:.9rem;padding:.9rem;">
+          <div class="stepnum">2</div>
+          <div>
+            <div style="font-weight:700;font-size:.88rem;margin-bottom:.2rem;">Vælg husstand eller enkeltperson</div>
+            <div style="font-size:.73rem;color:var(--muted);line-height:1.5;">Navn → tilknyt butik. Du er på holdet. Skridt tæller fra sekund 1.</div>
+          </div>
+        </div>
+        <div class="step" style="background:linear-gradient(135deg,rgba(218,41,28,.1),rgba(218,41,28,.05));border:2px solid rgba(218,41,28,.4);border-radius:.9rem;padding:1rem;box-shadow:0 4px 20px rgba(218,41,28,.12);">
+          <div class="stepnum" style="background:var(--red);color:#fff;width:2.2rem;height:2.2rem;font-size:.8rem;">3</div>
+          <div>
+            <div style="font-weight:800;font-size:.92rem;margin-bottom:.3rem;color:#fff;">Lås op for fællesskabets præmier 🔓</div>
+            <div style="font-size:.73rem;color:rgba(255,255,255,.8);line-height:1.55;">Her aktiverer vi medlemsnummeret og de 2 obligatoriske køb. Kun verificerede medejere med min. 2 køb i perioden er med i lodtrækning.</div>
+          </div>
+        </div>
+        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.25);border-radius:.75rem;padding:.8rem 1rem;font-size:.8rem;color:rgba(255,255,255,.9);line-height:1.6;">
+          <span style="color:#4ade80;font-weight:800;">Bonus for amba:</span> Flowet rekrutterer automatisk nye medejere – dem uden Coop-nummer ser et direkte link til "Bliv medejer".
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--mid);border:1px solid var(--border);border-radius:1.1rem;padding:1.2rem;margin-bottom:.85rem;">
+          <div style="font-size:.7rem;font-weight:800;color:#fff;margin-bottom:.9rem;">Nul ekstra arbejde for butikken</div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;">
+            <div class="flow-ring"><span style="font-size:.9rem;">📱</span></div>
+            <div class="conn"></div><div class="arr"></div>
+            <div class="flow-ring hot"><span style="font-size:.9rem;">👣</span></div>
+            <div class="conn"></div><div class="arr"></div>
+            <div class="flow-ring"><span style="font-size:.9rem;">🏆</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);">
+            <span style="text-align:center;max-width:70px;">Tilmelding<br>QR/App/FB</span>
+            <span style="text-align:center;max-width:70px;color:#fff;font-weight:700;">Tæl Skridt<br><span style="color:var(--red)">Automatisk</span></span>
+            <span style="text-align:center;max-width:70px;color:#fff;font-weight:700;">Lodtrækning<br><span style="color:var(--red)">Automatisk</span></span>
+          </div>
+        </div>
+        <div style="background:var(--mid);border:1px solid var(--border);border-radius:1.1rem;padding:1.1rem;">
+          <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Sådan virker det bag kulisserne</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div style="display:flex;align-items:center;gap:.65rem;font-size:.75rem;">
+              <span style="width:1.6rem;height:1.6rem;border-radius:50%;background:rgba(218,41,28,.15);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--red);flex-shrink:0;">1</span>
+              <span style="color:rgba(255,255,255,.75);">Coop kassesystem → batch CSV</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.65rem;font-size:.75rem;">
+              <span style="width:1.6rem;height:1.6rem;border-radius:50%;background:rgba(218,41,28,.15);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--red);flex-shrink:0;">2</span>
+              <span style="color:rgba(255,255,255,.75);">QuickInfo matcher: medlemsnr + butik-ID + dato</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.65rem;font-size:.75rem;">
+              <span style="width:1.6rem;height:1.6rem;border-radius:50%;background:rgba(218,41,28,.15);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--red);flex-shrink:0;">3</span>
+              <span style="color:rgba(255,255,255,.75);">Lodtrækningspulje opdateres – <strong style="color:#4ade80;">nul arbejde for butik</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 4: UDDELER-GUIDEN ══ -->
+<section class="slide" id="s4">
+  <div class="inner">
+    <div style="text-align:center;margin-bottom:1.7rem;">
+      <div class="tag rv" style="margin-bottom:.8rem;"><span data-lucide="clipboard-check" style="width:11px;height:11px;"></span> For butikschefen</div>
+      <h2 class="title rv">Aktiv vs. <span class="red">passiv butik</span></h2>
+      <p class="rv muted" style="margin-top:.55rem;font-size:.92rem;">Systemet fungerer på autopilot via CoopApp og FB – butikschefen vælger selv sit engagement.</p>
+    </div>
+    <div class="rv" style="display:grid;grid-template-columns:1fr 1fr;gap:1.8rem;">
+      <div style="border:1px solid rgba(74,222,128,.22);background:rgba(74,222,128,.04);border-radius:1.2rem;padding:1.35rem;">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;">
+          <span style="font-size:1.4rem;">😌</span>
+          <div>
+            <div style="font-weight:800;font-size:.95rem;">Niveau 1 – Den travle butik</div>
+            <div style="font-size:.65rem;color:#4ade80;font-weight:600;">15 MINUTTERS INDSATS</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.55rem;">
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="check-circle-2" style="width:15px;height:15px;color:#4ade80;flex-shrink:0;"></span>
+            <span>Hæng <strong style="color:#fff;">5 plakater</strong> op – vi sender dem klar til print</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="check-circle-2" style="width:15px;height:15px;color:#4ade80;flex-shrink:0;"></span>
+            <span>Placer <strong style="color:#fff;">1 gulvfolie</strong> ved indgangen (Klubhuset)</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="check-circle-2" style="width:15px;height:15px;color:#4ade80;flex-shrink:0;margin-top:.1rem;"></span>
+            <div><strong style="color:#fff;">Digital aktivering via amba</strong><br><span style="font-size:.71rem;color:rgba(255,255,255,.65);line-height:1.5;">Coop amba pusher kampagnen direkte til butikkens lokale FB-side og CoopApp. Butikken skal intet gøre digitalt.</span></div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;padding:.7rem .9rem;background:rgba(74,222,128,.08);border-radius:.6rem;font-size:.7rem;color:rgba(255,255,255,.75);line-height:1.5;">
+          Amba ejer den digitale kontakt – butikken leverer det fysiske Klubhus.
+        </div>
+      </div>
+      <div style="border:1px solid rgba(251,191,36,.22);background:rgba(251,191,36,.03);border-radius:1.2rem;padding:1.35rem;">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;">
+          <span style="font-size:1.4rem;">🔥</span>
+          <div>
+            <div style="font-weight:800;font-size:.95rem;">Niveau 2 – Ildsjæl-butikken</div>
+            <div style="font-size:.65rem;color:#fbbf24;font-weight:600;">VALGFRIT – BOOSTER EFFEKTEN</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.55rem;">
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="plus-circle" style="width:15px;height:15px;color:#fbbf24;flex-shrink:0;"></span>
+            <span>Arranger fælles <strong style="color:#fff;">lørdagsgåtur</strong> fra indgangen</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="plus-circle" style="width:15px;height:15px;color:#fbbf24;flex-shrink:0;"></span>
+            <span>Post ugentligt <strong style="color:#fff;">"High five"</strong> til førende husstand på FB</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="plus-circle" style="width:15px;height:15px;color:#fbbf24;flex-shrink:0;"></span>
+            <span>Sæt <strong style="color:#fff;">skridt-rute</strong> op der går forbi specialafdelinger</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.65rem;font-size:.8rem;">
+            <span data-lucide="plus-circle" style="width:15px;height:15px;color:#fbbf24;flex-shrink:0;margin-top:.1rem;"></span>
+            <div><strong style="color:#fff;">Lokale 'Pitstop-tilbud'</strong> <span style="font-size:.68rem;color:rgba(255,255,255,.45);font-weight:400;">(Drevet af butikkens egne varer)</span><br><span style="font-size:.71rem;color:rgba(255,255,255,.65);line-height:1.5;">Uddeleren kan aktivere her-og-nu tilbud i appen for at drive mersalg på specifikke varegrupper.</span></div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;padding:.7rem .9rem;background:rgba(251,191,36,.07);border-radius:.6rem;font-size:.7rem;color:rgba(255,255,255,.75);line-height:1.5;">
+          250+ skridt fra frugt til bageri. Dokumenteret effektiv retail-teknik.
+        </div>
+      </div>
+    </div>
+    <div class="rv" style="margin-top:1.1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;">
+      <div style="text-align:center;padding:.9rem;background:var(--mid);border:1px solid var(--border);border-radius:.85rem;">
+        <div style="font-size:1.9rem;font-weight:900;color:var(--red);">300</div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600;margin-top:.2rem;">Estimeret transaktions-potentiale</div>
+        <div style="font-size:.58rem;color:var(--muted);margin-top:.15rem;">Baseret på 150 aktive husstande</div>
+      </div>
+      <div style="text-align:center;padding:.9rem;background:var(--mid);border:1px solid var(--border);border-radius:.85rem;">
+        <div style="font-size:1.9rem;font-weight:900;color:var(--red);">Målbar</div>
+        <div style="font-size:.68rem;font-weight:900;color:var(--red);margin-bottom:.1rem;">adfærdsændring</div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600;margin-top:.2rem;">Verificerbar via medlemsnummer</div>
+        <div style="font-size:.58rem;color:var(--muted);margin-top:.15rem;">+ kassedata efter pilot</div>
+      </div>
+      <div style="text-align:center;padding:.9rem;background:var(--mid);border:1px solid var(--border);border-radius:.85rem;">
+        <div style="font-size:1.9rem;font-weight:900;color:var(--red);">15</div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600;margin-top:.2rem;">Min. opsætning</div>
+        <div style="font-size:.58rem;color:var(--muted);margin-top:.15rem;">for butikken</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 5: RISICI & PILOT-ASK ══ -->
+<section class="slide" id="s5">
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:start;">
+      <div>
+        <div class="tag rv" style="margin-bottom:.9rem;"><span data-lucide="shield-check" style="width:11px;height:11px;"></span> Inden I spørger</div>
+        <h2 class="title rv" style="font-size:clamp(1.6rem,3.5vw,2.6rem);margin-bottom:1.1rem;">Proaktiv <span class="red">risikostyring</span></h2>
+        <div class="rv" style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;">
+          <div style="background:var(--mid);border:1px solid var(--border);border-radius:.9rem;padding:.9rem 1.1rem;">
+            <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem;">CoopApp-integration?</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.55;">Fase 1 er <strong style="color:#4ade80;">100% Plug &amp; Play</strong> – ingen IT-integration nødvendig. amba kan allerede i dag pushe kampagnen direkte til butikkens lokale FB-side og CoopApp-brugere. Hvervning er stærk fra dag 1.</div>
+          </div>
+          <div style="background:var(--mid);border:1px solid var(--border);border-radius:.9rem;padding:.9rem 1.1rem;">
+            <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem;">Hvorfra de 150 husstande?</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.55;">Dette er et <strong style="color:#4ade80;">konservativt benchmark</strong> baseret på normal konvertering i Coops egne kanaler – svarende til 'Ja tak'-tilbud. Lokal FB-side (typisk 2.000+ følgere) + CoopApp push i nærområdet giver 7–8% = 150 husstande.</div>
+          </div>
+          <div style="background:var(--mid);border:1px solid var(--border);border-radius:.9rem;padding:.9rem 1.1rem;">
+            <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem;">Hvem betaler præmien?</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.55;"><strong style="color:#fff;">amba's centrale præmie</strong> skaber branding og fællesskabsfølelse. <strong style="color:#fff;">Butikkens lokale præmier</strong> (valgfx) skaber mersalg på specifikke varegrupper. To lag – én kampagne.</div>
+          </div>
+        </div>
+      </div>
+      <div class="rv">
+        <div style="background:linear-gradient(135deg,rgba(218,41,28,.12),rgba(218,41,28,.04));border:1px solid rgba(218,41,28,.3);border-radius:1.4rem;padding:2rem;text-align:center;">
+          <div style="font-size:2.8rem;margin-bottom:.6rem;">🏠</div>
+          <div style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em;line-height:1.2;margin-bottom:.8rem;">Vi gør jeres lokale butik til bydelens Klubhus.</div>
+          <div style="font-size:.85rem;color:rgba(255,255,255,.7);line-height:1.65;margin-bottom:.9rem;">Vi har beregnet et potentiale på <strong style="color:#fff;">300+ transaktioner</strong> pr. kampagneperiode. Alt verificeres via kassedata. Vi leverer beviset på effekten.</div>
+          <div style="font-size:1.15rem;font-weight:800;color:var(--red);margin-bottom:1.3rem;">Skal vi starte piloten i Åbyhøj?</div>
+          <div style="display:flex;flex-direction:column;gap:.65rem;">
+            <a href="tilmelding.html" class="ctabtn" style="text-decoration:none;justify-content:center;">Se tilmeldingsflow <span data-lucide="arrow-right" style="width:16px;height:16px;"></span></a>
+            <a href="kampagne.html" style="display:flex;align-items:center;justify-content:center;gap:.4rem;font-size:.8rem;color:var(--muted);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">
+              <span data-lucide="bar-chart-2" style="width:13px;height:13px;"></span> Se live kampagne-demo
+            </a>
+          </div>
+        </div>
+        <div style="margin-top:.85rem;display:flex;gap:.6rem;">
+          <div style="flex:1;text-align:center;padding:.7rem;background:rgba(74,222,128,.10);border:2px solid rgba(74,222,128,.55);border-radius:.7rem;box-shadow:0 0 12px rgba(74,222,128,.18);">
+            <div style="font-size:.65rem;color:#4ade80;font-weight:700;margin-bottom:.2rem;letter-spacing:.04em;">Fase 1 · Klar nu</div>
+            <div style="font-size:.82rem;font-weight:800;color:#fff;">Plug &amp; Play</div>
+            <div style="font-size:.58rem;color:rgba(74,222,128,.75);margin-top:.15rem;font-weight:600;">Ingen IT-integration</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:.7rem;background:var(--mid);border:1px solid var(--border);border-radius:.7rem;">
+            <div style="font-size:.65rem;color:var(--muted);margin-bottom:.2rem;">Fase 2 · Post-pilot</div>
+            <div style="font-size:.8rem;font-weight:700;color:#fbbf24;">CoopApp deep-link</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:.7rem;background:var(--mid);border:1px solid var(--border);border-radius:.7rem;">
+            <div style="font-size:.65rem;color:var(--muted);margin-bottom:.2rem;">Fase 3 · Skalering</div>
+            <div style="font-size:.8rem;font-weight:700;color:#c4b5fd;">800+ butikker</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 6: QUICKINFO ══ -->
+<section class="slide" id="s6" style="background:radial-gradient(ellipse at 70% 50%,rgba(218,41,28,.07) 0%,transparent 55%);">
+  <div class="inner" style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;">
+    <div>
+      <div class="tag rv" style="margin-bottom:1rem;"><span data-lucide="cpu" style="width:11px;height:11px;"></span> Bygget af QuickInfo</div>
+      <h2 class="title rv" style="font-size:clamp(1.6rem,3.5vw,2.8rem);margin-bottom:.9rem;">Vi aktiverer jeres <span class="red">eksisterende fundament</span></h2>
+      <p class="rv muted" style="font-size:.92rem;line-height:1.7;max-width:400px;margin-bottom:1.2rem;">QuickInfo er allerede integreret i Coop. Vi starter ikke fra nul – vi aktiverer blot de funktioner, der allerede ligger i QuickInfo og CoopApp.</p>
+      <div class="rv" style="display:flex;flex-direction:column;gap:.55rem;">
+        <div style="display:flex;align-items:flex-start;gap:.65rem;font-size:.82rem;">
+          <span data-lucide="check-circle-2" style="width:15px;height:15px;color:var(--red);flex-shrink:0;margin-top:.15rem;"></span>
+          <span><strong style="color:#fff;">Central styring:</strong> Vi har adgang til CoopApp + 600 lokale FB-sider fra ét panel – i dag.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem;font-size:.82rem;">
+          <span data-lucide="check-circle-2" style="width:15px;height:15px;color:var(--red);flex-shrink:0;margin-top:.15rem;"></span>
+          <span><strong style="color:#fff;">Tæl Skridt-motoren</strong> er gennemtestet og klar til brug i morgen. Ingen opstartsrisiko.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem;font-size:.82rem;">
+          <span data-lucide="check-circle-2" style="width:15px;height:15px;color:var(--red);flex-shrink:0;margin-top:.15rem;"></span>
+          <span><strong style="color:#fff;">Simpel batch-verifikation</strong> via kassedata sikrer 100% dokumentation af effekten – uden behov for tunge IT-integrationer i pilotfasen.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem;font-size:.82rem;">
+          <span data-lucide="check-circle-2" style="width:15px;height:15px;color:var(--red);flex-shrink:0;margin-top:.15rem;"></span>
+          <span>800+ butikker er allerede <strong style="color:#fff;">'Ready-to-run'</strong>. Det betyder lynhurtig udrulning efter piloten – uden ny opsætning.</span>
+        </div>
+      </div>
+    </div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:.85rem;">
+      <div class="glass" style="padding:1.2rem;">
+        <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.9rem;">QuickInfo nøgletal 2025</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
+          <div style="text-align:center;padding:.9rem;background:rgba(218,41,28,.1);border:1px solid rgba(218,41,28,.3);border-radius:.75rem;">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--red);">800+</div>
+            <div style="font-size:.62rem;color:#fff;font-weight:700;margin-top:.2rem;">Aktive butikker</div>
+            <div style="font-size:.56rem;color:var(--muted);margin-top:.1rem;">Klar til skalering</div>
+          </div>
+          <div style="text-align:center;padding:.9rem;background:var(--mid);border-radius:.75rem;">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--red);">600+</div>
+            <div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem;">FB-sider + 1.000+</div>
+          </div>
+          <div style="text-align:center;padding:.9rem;background:var(--mid);border-radius:.75rem;">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--red);">2M</div>
+            <div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem;">Coop medejere</div>
+          </div>
+          <div style="text-align:center;padding:.9rem;background:linear-gradient(135deg,rgba(218,41,28,.18),rgba(218,41,28,.08));border:2px solid rgba(218,41,28,.45);border-radius:.75rem;box-shadow:0 4px 16px rgba(218,41,28,.15);">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--red);">50%</div>
+            <div style="font-size:.62rem;color:#fff;font-weight:800;margin-top:.2rem;">COOP-EJET</div>
+            <div style="font-size:.56rem;color:rgba(218,41,28,.9);font-weight:600;margin-top:.1rem;">Intern opgradering</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.28);border-radius:.85rem;padding:1rem 1.15rem;">
+        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;font-weight:700;margin-bottom:.5rem;">Internt bevis · Coop amba</div>
+        <div style="font-size:.82rem;color:#fff;line-height:1.65;font-style:italic;margin-bottom:.45rem;">"Board Templates er live. CoopApp + FB-integration eksisterer i dag. <strong style="color:#4ade80;font-style:normal;">Vi aktiverer blot det, der eksisterer i dag.</strong>"</div>
+        <div style="font-size:.68rem;color:rgba(255,255,255,.55);">— Karsten Toksvig, amba admin</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- #wrap -->
+
+<!-- Nav -->
+<nav id="nav">
+  <button class="nbtn" id="prev" aria-label="Forrige"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <div class="dots" id="dots"></div>
+  <span id="ctr">1 / 6</span>
+  <button class="nbtn" id="next" aria-label="Næste"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+</nav>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const TOTAL = slides.length;
+  let cur = 0;
+
+  const dotsEl = document.getElementById('dots');
+  const ctrEl  = document.getElementById('ctr');
+  const prog   = document.getElementById('prog');
+
+  slides.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' on':'');
+    d.addEventListener('click', () => go(i));
+    dotsEl.appendChild(d);
+  });
+
+  function go(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('on');
+    cur = (n + TOTAL) % TOTAL;
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('on');
+    ctrEl.textContent = (cur+1) + ' / ' + TOTAL;
+    prog.style.width = ((cur+1)/TOTAL*100) + '%';
+    lucide.createIcons();
+  }
+
+  document.getElementById('prev').addEventListener('click', () => go(cur-1));
+  document.getElementById('next').addEventListener('click', () => go(cur+1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); go(cur+1); }
+    if (e.key==='ArrowLeft') { e.preventDefault(); go(cur-1); }
+  });
+
+  let tx=0;
+  document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx)>55) go(dx<0 ? cur+1 : cur-1);
+  }, {passive:true});
+
+  lucide.createIcons();
+</script>
+</body>
+</html>

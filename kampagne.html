@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Kvickly Åbyhøj – Tæl Skridt Kampagne</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    :root {
+      --red: #DA291C; --red-dark: #B01F14;
+      --bg: #0f0f0f; --mid: #1a1a1a; --light: #252525;
+      --border: rgba(255,255,255,.08); --muted: rgba(255,255,255,.45);
+      --green: #4ade80; --gold: #fbbf24;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { min-height:100vh; background:var(--bg); color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+      display:flex; flex-direction:column; align-items:center; padding:1rem 1rem 3rem; }
+
+    /* site nav */
+    #sitenav { width:100%; max-width:420px; display:flex; gap:.5rem; margin-bottom:1.2rem; }
+    .snlink { display:inline-flex; align-items:center; gap:.3rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      color:rgba(255,255,255,.7); font-size:.62rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+      padding:.26rem .65rem; border-radius:999px; text-decoration:none; transition:all .2s; }
+    .snlink:hover { background:rgba(218,41,28,.15); border-color:rgba(218,41,28,.4); color:#fff; }
+    .snlink.active-link { background:rgba(218,41,28,.18); border-color:rgba(218,41,28,.5); color:var(--red); }
+
+    .phone { width:100%; max-width:420px; background:var(--mid); border:1px solid var(--border); border-radius:2.2rem;
+      overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,.5); }
+
+    /* notch bar */
+    .notch-bar { padding:.9rem 1.4rem .6rem; display:flex; align-items:center; justify-content:center; }
+    .notch { width:100px; height:20px; background:var(--bg); border-radius:999px; }
+
+    .body { padding:0 1.1rem 1.4rem; display:flex; flex-direction:column; gap:1rem; }
+
+    /* campaign header */
+    .camp-header { background:linear-gradient(135deg,rgba(218,41,28,.14),rgba(218,41,28,.04)); border:1px solid rgba(218,41,28,.2); border-radius:1.4rem; padding:1.1rem 1.2rem; }
+    .live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block; animation:pdot 1.2s ease infinite; }
+    @keyframes pdot { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .day-progress { height:6px; background:rgba(255,255,255,.07); border-radius:3px; overflow:hidden; margin-top:.55rem; }
+    .day-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--red),#ff7b71); transition:width 1.2s ease; }
+
+    /* skridt log */
+    .skridt-nav { display:flex; align-items:center; justify-content:space-between; }
+    .nav-btn { width:2.2rem; height:2.2rem; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,.04); cursor:pointer;
+      display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.7); transition:all .2s; }
+    .nav-btn:hover { background:rgba(218,41,28,.12); border-color:rgba(218,41,28,.35); color:#fff; }
+    .big-steps { font-size:3.4rem; font-weight:900; letter-spacing:-.04em; text-align:center; line-height:1; color:#fff; }
+    .big-steps span { font-size:1.1rem; font-weight:500; color:var(--muted); vertical-align:middle; margin-left:.2rem; }
+    .skridt-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.5rem; margin-top:.5rem; }
+    .sstat { text-align:center; background:rgba(255,255,255,.04); border-radius:.75rem; padding:.6rem .4rem; }
+    .sstat-val { font-size:1rem; font-weight:800; }
+    .sstat-lbl { font-size:.55rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-top:.15rem; }
+
+    .save-btn { width:100%; padding:.85rem; background:var(--red); color:#fff; font-size:.9rem; font-weight:700;
+      border:none; border-radius:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.5rem; transition:all .2s; }
+    .save-btn:hover { background:var(--red-dark); transform:scale(1.02); }
+    .save-btn.saved { background:rgba(74,222,128,.15); border:1px solid rgba(74,222,128,.3); color:var(--green); cursor:default; transform:none; }
+
+    /* streak calendar */
+    .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:.3rem; }
+    .cal-day { aspect-ratio:1; border-radius:.4rem; display:flex; align-items:center; justify-content:center; font-size:.6rem; font-weight:700; }
+    .cal-day.done { background:rgba(218,41,28,.2); color:var(--red); }
+    .cal-day.today { background:var(--red); color:#fff; }
+    .cal-day.empty { background:rgba(255,255,255,.04); color:var(--muted); }
+    .cal-day.future { background:rgba(255,255,255,.02); color:rgba(255,255,255,.15); }
+
+    /* push notification */
+    .push { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:1.2rem; padding:.9rem 1rem; }
+    .push-head { display:flex; align-items:center; gap:.7rem; margin-bottom:.5rem; }
+    .push-icon { width:2.2rem; height:2.2rem; border-radius:.5rem; background:var(--red); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .push-from { font-size:.65rem; font-weight:700; }
+    .push-time { font-size:.6rem; color:var(--muted); }
+
+    /* leaderboard */
+    .lb-section { background:rgba(255,255,255,.025); border:1px solid var(--border); border-radius:1.3rem; overflow:hidden; }
+    .lb-head { padding:.8rem 1rem; background:rgba(218,41,28,.06); border-bottom:1px solid rgba(218,41,28,.12); display:flex; align-items:center; justify-content:space-between; }
+    .lb-cols { display:grid; grid-template-columns:2.2rem 1fr .7fr .7fr; gap:.3rem; padding:.5rem 1rem; font-size:.55rem; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); border-bottom:1px solid rgba(255,255,255,.04); }
+    .lb-row { display:grid; grid-template-columns:2.2rem 1fr .7fr .7fr; gap:.3rem; padding:.65rem 1rem; align-items:center; border-bottom:1px solid rgba(255,255,255,.03); transition:background .2s; }
+    .lb-row:last-child { border-bottom:none; }
+    .lb-row:hover { background:rgba(255,255,255,.03); }
+    .lb-row.me { background:rgba(218,41,28,.06); border-color:rgba(218,41,28,.1); }
+    .lb-row.me:hover { background:rgba(218,41,28,.09); }
+    .rank { font-size:.82rem; font-weight:900; text-align:center; }
+    .rank.gold { color: var(--gold); }
+    .rank.silver { color: #d1d5db; }
+    .rank.bronze { color: #cd7c45; }
+    .lb-name { font-size:.82rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .lb-sub { font-size:.6rem; color:var(--muted); margin-top:.05rem; }
+    .lb-avg { font-size:.78rem; font-weight:700; color:var(--red); text-align:right; }
+    .lb-total { font-size:.72rem; color:rgba(255,255,255,.65); text-align:right; }
+
+    /* lodtrækning banner */
+    .lod-banner { border-radius:1.1rem; padding:.9rem 1.1rem; display:flex; align-items:flex-start; gap:.75rem; }
+    .lod-banner.ok { background:rgba(74,222,128,.06); border:1px solid rgba(74,222,128,.22); }
+    .lod-banner.need { background:rgba(251,191,36,.05); border:1px solid rgba(251,191,36,.22); }
+
+    /* stats strip */
+    .stats-strip { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:1.1rem; padding:.8rem 1rem; }
+    .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+    .stat-item { text-align:center; }
+    .stat-val { font-size:1.15rem; font-weight:900; }
+    .stat-lbl { font-size:.58rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:.1rem; }
+
+    /* ticker */
+    .ticker-wrap { overflow:hidden; background:rgba(218,41,28,.08); border-top:1px solid rgba(218,41,28,.15); border-bottom:1px solid rgba(218,41,28,.15); padding:.5rem 0; }
+    .ticker { display:flex; gap:3rem; width:max-content; animation:ticker 22s linear infinite; font-size:.72rem; color:rgba(255,255,255,.7); font-weight:500; }
+    .ticker strong { color:#fff; }
+    @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* spin & win */
+    .spin-strip { background:linear-gradient(135deg,rgba(218,41,28,.12),rgba(176,31,20,.08)); border:1px solid rgba(218,41,28,.25); border-radius:1.2rem; padding:1rem 1.1rem; text-align:center; }
+    .wheel { font-size:3rem; animation:spin-w 8s linear infinite; display:inline-block; }
+    @keyframes spin-w { to{transform:rotate(360deg)} }
+
+    .section-label { font-size:.58rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-bottom:.5rem; }
+
+    @keyframes barIn { from{width:0} }
+    .lb-fill-animate { animation:barIn 1s ease forwards; }
+  </style>
+</head>
+<body>
+
+<div id="sitenav">
+  <a href="pitch.html" class="snlink">📊 Pitch</a>
+  <a href="tilmelding.html" class="snlink">📱 Tilmelding</a>
+  <a href="kampagne.html" class="snlink active-link">🏆 Kampagne</a>
+</div>
+
+<div class="phone">
+
+  <!-- notch -->
+  <div class="notch-bar"><div class="notch"></div></div>
+
+  <div class="body">
+
+    <!-- CAMPAIGN HEADER -->
+    <div class="camp-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;">
+        <div style="display:flex;align-items:center;gap:.55rem;">
+          <span style="font-size:1.4rem;">🏠</span>
+          <div>
+            <div style="font-size:.88rem;font-weight:800;">Kvickly Åbyhøj</div>
+            <div style="font-size:.62rem;color:var(--muted);">Tæl Skridt Holdet 2026</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.22);border-radius:999px;padding:.22rem .6rem;">
+          <div class="live-dot"></div>
+          <span style="font-size:.6rem;font-weight:700;color:var(--green);">LIVE</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:.7rem;color:rgba(255,255,255,.7);margin-bottom:.4rem;">
+        <span><strong style="color:#fff;">Dag 8</strong> af 14</span>
+        <span style="color:var(--red);font-weight:700;">6 dage tilbage</span>
+      </div>
+      <div class="day-progress"><div class="day-fill" style="width:57%;"></div></div>
+    </div>
+
+    <!-- SKRIDT LOG (today) -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:1.3rem;padding:1rem 1.1rem;">
+      <div class="section-label">Dine skridt i dag</div>
+      <div class="skridt-nav" style="margin-bottom:.6rem;">
+        <button class="nav-btn" onclick="changeDay(-1)"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div style="text-align:center;">
+          <div style="font-size:.72rem;color:var(--muted);" id="date-label">I dag · man d. 8. jan</div>
+        </div>
+        <button class="nav-btn" onclick="changeDay(1)"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="big-steps" id="step-count">8.240 <span>skridt</span></div>
+      <div class="skridt-stats">
+        <div class="sstat">
+          <div class="sstat-val" style="color:var(--green);">8</div>
+          <div class="sstat-lbl">Dage i streg</div>
+        </div>
+        <div class="sstat">
+          <div class="sstat-val" style="color:var(--red);">7.850</div>
+          <div class="sstat-lbl">Daglig gns.</div>
+        </div>
+        <div class="sstat">
+          <div class="sstat-val">62.800</div>
+          <div class="sstat-lbl">I alt</div>
+        </div>
+      </div>
+      <div style="height:.7rem;"></div>
+      <button class="save-btn" id="save-btn" onclick="saveSteps()">
+        <span data-lucide="save" style="width:16px;height:16px;"></span>
+        Gem skridt for i dag
+      </button>
+    </div>
+
+    <!-- 14-DAGES KALENDER -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:1.3rem;padding:1rem 1.1rem;">
+      <div class="section-label" style="margin-bottom:.7rem;">Aktive dage i kampagneperioden</div>
+      <div class="cal">
+        <!-- dag 1-7: done; dag 8: today; dag 9-14: future -->
+        <div class="cal-day done">1</div>
+        <div class="cal-day done">2</div>
+        <div class="cal-day done">3</div>
+        <div class="cal-day done">4</div>
+        <div class="cal-day done">5</div>
+        <div class="cal-day done">6</div>
+        <div class="cal-day done">7</div>
+        <div class="cal-day today">8</div>
+        <div class="cal-day future">9</div>
+        <div class="cal-day future">10</div>
+        <div class="cal-day future">11</div>
+        <div class="cal-day future">12</div>
+        <div class="cal-day future">13</div>
+        <div class="cal-day future">14</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.9rem;margin-top:.6rem;font-size:.62rem;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:.3rem;"><div style="width:10px;height:10px;border-radius:.2rem;background:rgba(218,41,28,.2);"></div> Aktiv dag</div>
+        <div style="display:flex;align-items:center;gap:.3rem;"><div style="width:10px;height:10px;border-radius:.2rem;background:var(--red);"></div> I dag</div>
+      </div>
+    </div>
+
+    <!-- PUSH NOTIFICATION -->
+    <div>
+      <div class="section-label">QuickInfo push-besked til dig</div>
+      <div class="push">
+        <div class="push-head">
+          <div class="push-icon">🏪</div>
+          <div style="flex:1;">
+            <div class="push-from">Kvickly Åbyhøj</div>
+            <div class="push-time">I dag · 14:22</div>
+          </div>
+          <div style="font-size:.6rem;background:rgba(218,41,28,.12);color:var(--red);border-radius:999px;padding:.15rem .5rem;font-weight:700;">1</div>
+        </div>
+        <div style="font-size:.82rem;font-weight:600;margin-bottom:.3rem;">Du har gået 8.240 skridt i dag 🎉</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.75);line-height:1.6;">Familien Hansen er nr. <strong style="color:var(--red);">4</strong> på leaderboardet. Familien Nielsen leder med 14.200 skridt. Kig forbi Klubhuset og hent point (og aftensmad) 🥛</div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div>
+      <div class="section-label">Holdets leaderboard · dag 8 / 14</div>
+      <div class="lb-section">
+        <div class="lb-head">
+          <div style="font-size:.75rem;font-weight:700;">Team Kvickly Åbyhøj</div>
+          <div style="font-size:.65rem;color:var(--muted);">62 på holdet</div>
+        </div>
+        <div class="lb-cols">
+          <div>#</div><div>Holdnavn</div><div>Daglig gns.</div><div>I alt</div>
+        </div>
+        <!-- rows -->
+        <div class="lb-row">
+          <div class="rank gold">🥇</div>
+          <div><div class="lb-name">Familien Nielsen</div><div class="lb-sub"><span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:999px;padding:.05rem .45rem;font-size:.6rem;font-weight:700;">Kvalificeret</span></div></div>
+          <div class="lb-avg">14.200</div>
+          <div class="lb-total">113.600</div>
+        </div>
+        <div class="lb-row">
+          <div class="rank silver">🥈</div>
+          <div><div class="lb-name">Jesper &amp; Lotte</div><div class="lb-sub"><span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:999px;padding:.05rem .45rem;font-size:.6rem;font-weight:700;">Kvalificeret</span></div></div>
+          <div class="lb-avg">12.850</div>
+          <div class="lb-total">102.800</div>
+        </div>
+        <div class="lb-row">
+          <div class="rank bronze">🥉</div>
+          <div><div class="lb-name">Familien Larsen</div><div class="lb-sub"><span style="background:rgba(251,191,36,.12);color:#fbbf24;border-radius:999px;padding:.05rem .45rem;font-size:.6rem;font-weight:700;">Mangler køb</span></div></div>
+          <div class="lb-avg">11.200</div>
+          <div class="lb-total">89.600</div>
+        </div>
+        <div class="lb-row me">
+          <div class="rank" style="color:var(--red);font-size:.72rem;font-weight:900;">4</div>
+          <div><div class="lb-name" style="color:var(--red);">Familie Hansen ← dig</div><div class="lb-sub"><span style="background:rgba(251,191,36,.12);color:#fbbf24;border-radius:999px;padding:.05rem .45rem;font-size:.6rem;font-weight:700;">Mangler køb</span></div></div>
+          <div class="lb-avg" style="color:var(--red);">7.850</div>
+          <div class="lb-total">62.800</div>
+        </div>
+        <div class="lb-row">
+          <div class="rank" style="color:var(--muted);">5</div>
+          <div><div class="lb-name">Mette &amp; Emil</div><div class="lb-sub"><span style="background:rgba(251,191,36,.12);color:#fbbf24;border-radius:999px;padding:.05rem .45rem;font-size:.6rem;font-weight:700;">Mangler køb</span></div></div>
+          <div class="lb-avg" style="color:var(--muted);">7.200</div>
+          <div class="lb-total">57.600</div>
+        </div>
+        <div class="lb-row">
+          <div class="rank" style="color:var(--muted);">6</div>
+          <div><div class="lb-name">Sandhal Familien</div><div class="lb-sub"><span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:999px;padding:.05rem .45rem;font-size:.6rem;font-weight:700;">Kvalificeret</span></div></div>
+          <div class="lb-avg" style="color:var(--muted);">6.800</div>
+          <div class="lb-total">54.400</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LODTRÆKNING STATUS -->
+    <div class="lod-banner need">
+      <span style="font-size:1.6rem;flex-shrink:0;">🎁</span>
+      <div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--gold);margin-bottom:.3rem;">Aktivér din vinderchance: 1 køb mangler</div>
+        <div style="font-size:.73rem;color:rgba(255,255,255,.75);line-height:1.55;">Familie Hansen har registreret <strong style="color:#fff;">1 ud af 2</strong> nødvendige køb. Næste nightly-tjek: i nat kl. 01:00.</div>
+        <div style="margin-top:.5rem;background:rgba(251,191,36,.08);border-radius:.5rem;padding:.45rem .6rem;font-size:.68rem;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:.4rem;">
+          <span>🛒</span> Vi har registreret 1 ud af 2 køb. Køb nr. 2 sikrer jeres plads i søndagens lodtrækning!
+        </div>
+      </div>
+    </div>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap" style="margin:0 -1.1rem;border-radius:0;">
+      <div class="ticker">
+        <span>🏃 Familien Nielsen gik <strong>14.200</strong> skridt i går</span>
+        <span>🛒 Jesper & Lotte er klar til lodtrækning</span>
+        <span>🎯 62 husstande kæmper om præmien</span>
+        <span>📅 Fælles gåtur <strong>lørdag 10:00</strong> fra indgangen</span>
+        <span>🏆 Lodtrækning <strong>søndag aften</strong> på Kvickly-siden</span>
+        <span>👣 Hold-total: <strong>842.000 skridt</strong></span>
+        <span>🏃 Familien Nielsen gik <strong>14.200</strong> skridt i går</span>
+        <span>🛒 Jesper & Lotte er klar til lodtrækning</span>
+        <span>🎯 62 husstande kæmper om præmien</span>
+        <span>📅 Fælles gåtur <strong>lørdag 10:00</strong> fra indgangen</span>
+        <span>🏆 Lodtrækning <strong>søndag aften</strong> på Kvickly-siden</span>
+        <span>👣 Hold-total: <strong>842.000 skridt</strong></span>
+      </div>
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip">
+      <div class="section-label" style="margin-bottom:.7rem;">Kampagne-overblik</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-val" style="color:var(--red);">62</div>
+          <div class="stat-lbl">Husstande på holdet</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" style="color:var(--red);">8/14</div>
+          <div class="stat-lbl">Dag i kampagnen</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" style="color:var(--green);">38</div>
+          <div class="stat-lbl">Kvalificerede husstande (2 køb)</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" style="color:var(--gold);">842k</div>
+          <div class="stat-lbl">842k skridt mod det fælles mål</div>
+        </div>
+      </div>
+      <div style="margin-top:.8rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:.75rem;padding:.65rem .8rem;display:flex;align-items:center;gap:.65rem;">
+        <span style="font-size:1.1rem;flex-shrink:0;">📅</span>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.8);line-height:1.5;">
+          <strong style="color:#fff;">Fælles gåtur</strong> · Lørdag kl. 10:00<br>
+          <span style="color:var(--muted);">Meet op foran Kvickly Åbyhøj · alle er velkomne</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPIN & WIN -->
+    <div class="spin-strip">
+      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.5rem;">Lodtrækning · søndag</div>
+      <div class="wheel">🎡</div>
+      <div style="font-size:.95rem;font-weight:800;margin:.45rem 0 .3rem;">Spin og Vind</div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.55;margin-bottom:.8rem;">Eksklusiv lodtrækning for alle med 2 bekræftede køb. Én husstand vinder præmien søndagen efter kampagnen.</div>
+      <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(218,41,28,.12);border:1px solid rgba(218,41,28,.28);border-radius:999px;padding:.3rem .85rem;font-size:.7rem;font-weight:700;color:var(--red);">
+        <span class="live-dot" style="background:var(--red);"></span> Lodtrækning søndag den 15. januar kl. 19:00
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <a href="tilmelding.html" style="display:flex;align-items:center;justify-content:center;gap:.6rem;background:var(--red);color:#fff;font-size:.92rem;font-weight:700;padding:.9rem;border-radius:1.1rem;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='var(--red-dark)'" onmouseout="this.style.background='var(--red)'">
+      <span data-lucide="users" style="width:17px;height:17px;"></span>
+      Tilmeld dit hold nu
+    </a>
+
+  </div><!-- .body -->
+</div><!-- .phone -->
+
+<script>
+  const days = ['Søn','Man','Tir','Ons','Tor','Fre','Lør'];
+  const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+  let offset = 0;
+  let saved = false;
+  const stepCounts = [9100,8300,7200,10500,6800,9400,7900,8240];
+  const dateLabels = ['Man d. 1.','Tir d. 2.','Ons d. 3.','Tor d. 4.','Fre d. 5.','Lør d. 6.','Søn d. 7.','Man d. 8.'];
+
+  function changeDay(dir) {
+    offset += dir;
+    if (offset > 0) offset = 0;
+    if (offset < -7) offset = -7;
+    const idx = 7 + offset;
+    const count = stepCounts[idx] ?? 0;
+    document.getElementById('step-count').innerHTML = count.toLocaleString('da') + ' <span>skridt</span>';
+    document.getElementById('date-label').textContent = (offset === 0 ? 'I dag · ' : '') + dateLabels[idx] + ' jan';
+    const btn = document.getElementById('save-btn');
+    if (offset !== 0) {
+      btn.classList.add('saved');
+      btn.innerHTML = '<span data-lucide="check-circle-2" style="width:16px;height:16px;"></span> Allerede gemt';
+    } else {
+      btn.classList.remove('saved');
+      btn.innerHTML = '<span data-lucide="save" style="width:16px;height:16px;"></span> Gem skridt for i dag';
+      if (saved) {
+        btn.classList.add('saved');
+        btn.innerHTML = '<span data-lucide="check-circle-2" style="width:16px;height:16px;"></span> Skridt gemt!';
+      }
+    }
+    lucide.createIcons();
+  }
+
+  function saveSteps() {
+    saved = true;
+    const btn = document.getElementById('save-btn');
+    btn.classList.add('saved');
+    btn.innerHTML = '<span data-lucide="check-circle-2" style="width:16px;height:16px;"></span> Skridt gemt!';
+    lucide.createIcons();
+  }
+
+  lucide.createIcons();
+</script>
+</body>
+</html>
